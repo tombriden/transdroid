@@ -15,26 +15,15 @@
   You should have received a copy of the GNU General Public License
   along with Transdroid.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<FrameLayout 
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="wrap_content"
-	android:layout_height="?attr/actionBarSize">
-	
-	<!-- This is a wrapper to be able to set the size of the progress item (since the first FrameLayout will be merged) -->
-	<FrameLayout 
-		android:layout_width="56dip"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:padding="@dimen/margin_half" >
+
+	<EditText
+		android:id="@+id/location_edit"
+		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:paddingLeft="3dip">
-		
-		<ProgressBar
-			android:id="@+id/progress"
-			android:layout_width="20dip"
-			android:layout_height="20dip"
-			android:layout_gravity="center"
-			style="@android:style/Widget.ProgressBar.Small.Inverse"
-			android:indeterminate="true"
-			android:indeterminateOnly="true" />
-			
-	</FrameLayout>
-	
+		android:inputType="textUri" />
+
 </FrameLayout>

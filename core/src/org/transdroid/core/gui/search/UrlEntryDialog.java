@@ -17,11 +17,14 @@
 package org.transdroid.core.gui.search;
 
 import org.transdroid.core.gui.TorrentsActivity;
+import org.transdroid.core.gui.navigation.NavigationHelper;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.net.Uri;
 import android.support.v4.app.DialogFragment;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -35,6 +38,7 @@ public class UrlEntryDialog {
 	 * activity's {@link TorrentsActivity#addTorrentByUrl(String, String) method}.
 	 * @param activity The activity that opens (and owns) this dialog
 	 */
+	@SuppressLint("ValidFragment")
 	public static void startUrlEntry(final TorrentsActivity activity) {
 		new DialogFragment() {
 			public android.app.Dialog onCreateDialog(android.os.Bundle savedInstanceState) {
@@ -48,8 +52,10 @@ public class UrlEntryDialog {
 							public void onClick(DialogInterface dialog, int which) {
 								// Assume text entry box input as URL and treat the filename (after the last /) as title
 								String url = urlInput.getText().toString();
-								if (activity != null && !TextUtils.isEmpty(url))
-									activity.addTorrentByUrl(url, url.substring(url.lastIndexOf("/")));
+								if (activity != null && !TextUtils.isEmpty(url)) {
+									String title = NavigationHelper.extractNameFromUri(Uri.parse(url));
+									activity.addTorrentByUrl(url, title);
+								}
 							}
 						}).setNegativeButton(android.R.string.cancel, null).create();
 			};
