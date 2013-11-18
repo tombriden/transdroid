@@ -32,7 +32,7 @@ import org.transdroid.core.app.search.SearchHelper;
 import org.transdroid.core.app.search.SearchSite;
 import org.transdroid.core.gui.navigation.StatusType;
 import org.transdroid.core.gui.search.SearchSetting;
-import org.transdroid.core.widget.WidgetConfig;
+import org.transdroid.core.widget.ListWidgetConfig;
 import org.transdroid.daemon.Daemon;
 import org.transdroid.daemon.OS;
 import org.transdroid.daemon.TorrentsSortBy;
@@ -92,22 +92,27 @@ public class ApplicationSettings {
 		// @formatter:off
 		Daemon type = Daemon.fromCode(prefs.getString("server_type_" + order, null));
 		boolean ssl = prefs.getBoolean("server_sslenabled_" + order, false);
-		
+
 		String port = prefs.getString("server_port_" + order, "");
-		if(port.equals(""))
+		if (port.equals(""))
 			port = Integer.toString(Daemon.getDefaultPortNumber(type, ssl));
-		
+		String localPort = prefs.getString("server_localport_" + order, "");
+		if (localPort.equals(""))
+			localPort = port; // Default to the normal (non-local) port
+
 		return new ServerSetting(order, 
-				prefs.getString("server_name_" + order, null), type, 
+				prefs.getString("server_name_" + order, null), 
+				type, 
 				prefs.getString("server_address_" + order, null), 
 				prefs.getString("server_localaddress_" + order, null),
+				Integer.parseInt(localPort),
 				prefs.getString("server_localnetwork_" + order, null), 
 				Integer.parseInt(port), 
 				ssl, 
-				prefs.getBoolean("server_ssltrustall_" + order, false),
-				prefs.getString("server_ssltrustkey_" + order, null), 
+				prefs.getBoolean("server_ssltrustall_" + order, false), 
+				prefs.getString("server_ssltrustkey_" + order, null),
 				prefs.getString("server_folder_" + order, null),
-				prefs.getBoolean("server_useauth_" + order, true), 
+				!prefs.getBoolean("server_disableauth_" + order, false), 
 				prefs.getString("server_user_" + order, null),
 				prefs.getString("server_pass_" + order, null), 
 				prefs.getString("server_extrapass_" + order, null),
@@ -145,7 +150,7 @@ public class ApplicationSettings {
 			edit.putBoolean("server_ssltrustall_" + i, prefs.getBoolean("server_ssltrustall_" + (i + 1), false));
 			edit.putString("server_ssltrustkey_" + i, prefs.getString("server_ssltrustkey_" + (i + 1), null));
 			edit.putString("server_folder_" + i, prefs.getString("server_folder_" + (i + 1), null));
-			edit.putBoolean("server_useauth_" + i, prefs.getBoolean("server_useauth_" + (i + 1), true));
+			edit.putBoolean("server_disableauth_" + i, prefs.getBoolean("server_disableauth_" + (i + 1), false));
 			edit.putString("server_user_" + i, prefs.getString("server_user_" + (i + 1), null));
 			edit.putString("server_pass_" + i, prefs.getString("server_pass_" + (i + 1), null));
 			edit.putString("server_extrapass_" + i, prefs.getString("server_extrapass_" + (i + 1), null));
@@ -169,7 +174,7 @@ public class ApplicationSettings {
 		edit.remove("server_ssltrustall_" + max);
 		edit.remove("server_ssltrustkey_" + max);
 		edit.remove("server_folder_" + max);
-		edit.remove("server_useauth_" + max);
+		edit.remove("server_disableauth_" + max);
 		edit.remove("server_user_" + max);
 		edit.remove("server_pass_" + max);
 		edit.remove("server_extrapass_" + max);
@@ -329,7 +334,7 @@ public class ApplicationSettings {
 				prefs.getString("rssfeed_name_" + order, null), 
 				prefs.getString("rssfeed_url_" + order, null), 
 				prefs.getBoolean("rssfeed_reqauth_" + order, false), 
-				lastViewed == -1L ? null: new Date(lastViewed));
+				lastViewed == -1L ? null : new Date(lastViewed));
 		// @formatter:on
 	}
 
@@ -427,12 +432,6 @@ public class ApplicationSettings {
 	public SearchSetting getLastUsedSearchSite() {
 		String lastKey = getLastUsedSearchSiteKey();
 		List<SearchSite> allsites = searchHelper.getAvailableSites();
-		int lastWebsearch = -1;
-		try {
-			lastWebsearch = Integer.parseInt(lastKey);
-		} catch (Exception e) {
-			// Not an in-app search site, but probably an in-app search
-		}
 
 		if (lastKey == null) {
 			// No site yet set specified; return the first in-app one, if available
@@ -442,6 +441,14 @@ public class ApplicationSettings {
 			return null;
 		}
 
+		int lastWebsearch = -1;
+		if (lastKey.startsWith(WebsearchSetting.KEY_PREFIX)) {
+			try {
+				lastWebsearch = Integer.parseInt(lastKey.substring(WebsearchSetting.KEY_PREFIX.length()));
+			} catch (Exception e) {
+				// Not an in-app search site, but probably an in-app search
+			}
+		}
 		if (lastWebsearch >= 0) {
 			// The last used site should be a user-configured web search site
 			int max = getMaxWebsearch(); // Zero-based index, so with max == 0 there is 1 server
@@ -481,7 +488,7 @@ public class ApplicationSettings {
 	 * Registers the unique key of some web search or in-app search site as being last used by the user
 	 * @param order The key identifying the specific server
 	 */
-	public void setLastUsedSearchSite(SearchSite site) {
+	public void setLastUsedSearchSite(SearchSetting site) {
 		prefs.edit().putString("header_setsearchsite", site.getKey()).commit();
 	}
 
@@ -516,15 +523,16 @@ public class ApplicationSettings {
 	 * @param appWidgetId The unique ID of the app widget to retrieve settings for, as supplied by the AppWidgetManager
 	 * @return A widget configuration object, or null if no settings were stored for the widget ID
 	 */
-	public WidgetConfig getWidgetConfig(int appWidgetId) {
+	public ListWidgetConfig getWidgetConfig(int appWidgetId) {
 		if (!prefs.contains("widget_server_" + appWidgetId))
 			return null;
 		// @formatter:off
-		return new WidgetConfig(
-				prefs.getInt("widget_server_" + appWidgetId, -1),
-				StatusType.valueOf(prefs.getString("widget_status_" + appWidgetId, StatusType.ShowAll.name())),
-				TorrentsSortBy.valueOf(prefs.getString("widget_sortby_" + appWidgetId, TorrentsSortBy.Alphanumeric.name())),
-				prefs.getBoolean("widget_reverse_" + appWidgetId, false),
+		return new ListWidgetConfig(
+				prefs.getInt("widget_server_" + appWidgetId, -1), 
+				StatusType.valueOf(prefs.getString("widget_status_" + appWidgetId, StatusType.ShowAll.name())), 
+				TorrentsSortBy.valueOf(prefs.getString("widget_sortby_" + appWidgetId, TorrentsSortBy.Alphanumeric.name())), 
+				prefs.getBoolean("widget_reverse_" + appWidgetId, false), 
+				prefs.getBoolean("widget_showstatus_" + appWidgetId, false), 
 				prefs.getBoolean("widget_darktheme_" + appWidgetId, false));
 		// @formatter:on
 	}
@@ -535,7 +543,7 @@ public class ApplicationSettings {
 	 * @param appWidgetId The unique ID of the app widget to store settings for, as supplied by the AppWidgetManager
 	 * @param settings A widget configuration object, which may not be null
 	 */
-	public void setWidgetConfig(int appWidgetId, WidgetConfig settings) {
+	public void setWidgetConfig(int appWidgetId, ListWidgetConfig settings) {
 		if (settings == null)
 			throw new InvalidParameterException(
 					"The widget setting may not be null. Use removeWidgetConfig instead to remove existing settings for some app widget.");
@@ -544,6 +552,7 @@ public class ApplicationSettings {
 		edit.putString("widget_status_" + appWidgetId, settings.getStatusType().name());
 		edit.putString("widget_sortby_" + appWidgetId, settings.getSortBy().name());
 		edit.putBoolean("widget_reverse_" + appWidgetId, settings.shouldReserveSort());
+		edit.putBoolean("widget_showstatus_" + appWidgetId, settings.shouldShowStatusView());
 		edit.putBoolean("widget_darktheme_" + appWidgetId, settings.shouldUseDarkTheme());
 		edit.commit();
 	}
@@ -558,6 +567,7 @@ public class ApplicationSettings {
 		edit.remove("widget_status_" + appWidgetId);
 		edit.remove("widget_sortby_" + appWidgetId);
 		edit.remove("widget_reverse_" + appWidgetId);
+		edit.remove("widget_showstatus_" + appWidgetId);
 		edit.remove("widget_darktheme_" + appWidgetId);
 		edit.commit();
 	}

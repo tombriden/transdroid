@@ -57,8 +57,9 @@ public class ServerSettingsActivity extends KeyBoundPreferencesActivity {
 		initTextPreference("server_user");
 		initTextPreference("server_pass");
 		extraPass = initTextPreference("server_extrapass");
-		initTextPreference("server_localaddress");
 		initTextPreference("server_localnetwork");
+		initTextPreference("server_localaddress");
+		initTextPreference("server_localport");
 		folder = initTextPreference("server_folder");
 		initTextPreference("server_timeout", "8");
 		initBooleanPreference("server_alarmfinished", true);
@@ -67,9 +68,11 @@ public class ServerSettingsActivity extends KeyBoundPreferencesActivity {
 		downloadDir = initTextPreference("server_downloaddir");
 		initTextPreference("server_ftpurl");
 		initTextPreference("server_ftppass");
+		initBooleanPreference("server_disableauth");
 		initBooleanPreference("server_sslenabled");
 		initBooleanPreference("server_ssltrustall", false, "server_sslenabled");
 		initTextPreference("server_ssltrustkey", null, "server_sslenabled");
+		onPreferencesChanged();
 
 	}
 

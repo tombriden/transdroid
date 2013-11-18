@@ -30,6 +30,7 @@ import org.androidannotations.annotations.ItemClick;
 import org.androidannotations.annotations.ViewById;
 import org.transdroid.core.R;
 import org.transdroid.core.app.settings.ApplicationSettings;
+import org.transdroid.core.app.settings.SystemSettings;
 import org.transdroid.core.gui.lists.TorrentsAdapter;
 import org.transdroid.core.gui.lists.TorrentsAdapter_;
 import org.transdroid.core.gui.navigation.Label;
@@ -66,6 +67,8 @@ public class TorrentsFragment extends SherlockFragment implements OnLabelPickedL
 	// Local data
 	@Bean
 	protected ApplicationSettings applicationSettings;
+	@Bean
+	protected SystemSettings systemSettings;
 	@InstanceState
 	protected ArrayList<Torrent> torrents = null;
 	@InstanceState
@@ -133,6 +136,28 @@ public class TorrentsFragment extends SherlockFragment implements OnLabelPickedL
 	}
 
 	/**
+	 * Just look for a specific torrent in the currently shown list (by its unique id) and update only this
+	 * @param affected The affected torrent to update
+	 * @param wasRemoved Whether the affected torrent was indeed removed; otherwise it was updated somehow
+	 */
+	public void quickUpdateTorrent(Torrent affected, boolean wasRemoved) {
+		// Remove the old torrent object first
+		Iterator<Torrent> iter = this.torrents.iterator();
+		while (iter.hasNext()) {
+			Torrent torrent = iter.next();
+			if (torrent.getUniqueID().equals(affected.getUniqueID())) {
+				iter.remove();
+				break;
+			}
+		}
+		// In case it was an update, add the updated torrent object
+		if (!wasRemoved)
+			this.torrents.add(affected);
+		// Now refresh the screen
+		applyAllFilters();
+	}
+
+	/**
 	 * Clears the currently visible list of torrents.
 	 * @param b
 	 */
@@ -144,6 +169,7 @@ public class TorrentsFragment extends SherlockFragment implements OnLabelPickedL
 			this.currentTextFilter = null;
 			this.currentNavigationFilter = null;
 		}
+		clearCheckedStates();
 		applyAllFilters();
 	}
 
@@ -187,15 +213,12 @@ public class TorrentsFragment extends SherlockFragment implements OnLabelPickedL
 			return;
 		}
 
-		// Get the server daemon type directly form the local list of torrents, if it's not empty
-		Daemon serverType = (this.torrents.size() > 0 ? this.torrents.get(0).getDaemon() : Daemon.Transmission);
-
 		// Filter the list of torrents to show according to navigation and text filters
 		ArrayList<Torrent> filteredTorrents = new ArrayList<Torrent>(torrents);
 		if (filteredTorrents != null && currentNavigationFilter != null) {
 			// Remove torrents that do not match the selected navigation filter
 			for (Iterator<Torrent> torrentIter = filteredTorrents.iterator(); torrentIter.hasNext();) {
-				if (!currentNavigationFilter.matches(torrentIter.next()))
+				if (!currentNavigationFilter.matches(torrentIter.next(), systemSettings.treatDormantAsInactive()))
 					torrentIter.remove();
 			}
 		}
@@ -209,7 +232,7 @@ public class TorrentsFragment extends SherlockFragment implements OnLabelPickedL
 		}
 
 		// Sort the list of filtered torrents
-		Collections.sort(filteredTorrents, new TorrentsComparator(serverType, this.currentSortOrder,
+		Collections.sort(filteredTorrents, new TorrentsComparator(daemonType, this.currentSortOrder,
 				this.currentSortDescending));
 
 		((TorrentsAdapter) torrentsList.getAdapter()).update(filteredTorrents);
@@ -246,7 +269,7 @@ public class TorrentsFragment extends SherlockFragment implements OnLabelPickedL
 			// Get checked torrents
 			ArrayList<Torrent> checked = new ArrayList<Torrent>();
 			for (int i = 0; i < torrentsList.getCheckedItemPositions().size(); i++) {
-				if (torrentsList.getCheckedItemPositions().valueAt(i))
+				if (torrentsList.getCheckedItemPositions().valueAt(i) && i < torrentsList.getAdapter().getCount())
 					checked.add((Torrent) torrentsList.getAdapter().getItem(
 							torrentsList.getCheckedItemPositions().keyAt(i)));
 			}
@@ -329,6 +352,8 @@ public class TorrentsFragment extends SherlockFragment implements OnLabelPickedL
 
 	@ItemClick(resName = "torrent_list")
 	protected void torrentsListClicked(Torrent torrent) {
+		clearCheckedStates();
+		// Show the torrent details fragment
 		((TorrentsActivity) getActivity()).openDetails(torrent);
 	}
 
@@ -336,6 +361,13 @@ public class TorrentsFragment extends SherlockFragment implements OnLabelPickedL
 	public void onLabelPicked(String newLabel) {
 		for (Torrent torrent : lastMultiSelectedTorrents) {
 			getTasksExecutor().updateLabel(torrent, newLabel);
+		}
+	}
+
+	private void clearCheckedStates() {
+		// Remove any selection the user has made first
+		for (int i = 0; i < torrentsList.getAdapter().getCount(); i++) {
+			torrentsList.setItemChecked(i, false);
 		}
 	}
 

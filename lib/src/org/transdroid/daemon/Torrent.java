@@ -29,7 +29,7 @@ import android.os.Parcelable;
  * @author erickok
  *
  */
-public final class Torrent implements Parcelable, Comparable<Torrent> {
+public final class Torrent implements Parcelable, Comparable<Torrent>, Finishable {
 
 	final private long id;
 	final private String hash;
@@ -188,6 +188,42 @@ public final class Torrent implements Parcelable, Comparable<Torrent> {
 	}
 
 	/**
+	 * Returns whether this torrents is actively downloading or not.
+	 * @param dormantAsInactive If true, dormant (0KB/s, so no data transfer) torrents are never actively downloading
+	 * @return True if this torrent is to be treated as being in a downloading state, that is, it is trying to finish a
+	 *         download
+	 */
+	public boolean isDownloading(boolean dormantAsInactive) {
+		return statusCode == TorrentStatus.Downloading && (!dormantAsInactive || rateDownload > 0);
+	}
+
+	/**
+	 * Returns whether this torrents is actively seeding or not.
+	 * @param dormantAsInactive If true, dormant (0KB/s, so no data transfer) torrents are never actively seeding
+	 * @return True if this torrent is to be treated as being in a seeding state, that is, it is sending data to
+	 *         leechers
+	 */
+	public boolean isSeeding(boolean dormantAsInactive) {
+		return statusCode == TorrentStatus.Seeding && (!dormantAsInactive || rateUpload > 0);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isStarted() {
+		return partDone > 0;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isFinished() {
+		return partDone >= 1;
+	}
+
+	/**
 	 * Indicates if the torrent can be paused at this moment
 	 * @return If it can be paused
 	 */
@@ -249,6 +285,10 @@ public final class Torrent implements Parcelable, Comparable<Torrent> {
 
 	public void mimicNewLabel(String newLabel) {
 		label = newLabel;
+	}
+	
+	public void mimicCheckingStatus() {
+		statusCode = TorrentStatus.Checking;
 	}
 
 	public void mimicNewLocation(String newLocation) {

@@ -59,9 +59,15 @@ public class TorrentsComparator implements Comparator<Torrent> {
 			case Status:
 				return tor1.getStatusCode().compareStatusCodeTo(tor2.getStatusCode());
 			case DateAdded:
+				if (tor1.getDateAdded() == null)
+					return -1;
+				if (tor2.getDateAdded() == null)
+					return 1;
 				return tor1.getDateAdded().compareTo(tor2.getDateAdded());
 			case DateDone:
 				return tor1.getDateDone().compareTo(tor2.getDateDone());
+			case DownloadSpeed:
+				return new Integer(tor1.getRateDownload()).compareTo(new Integer(tor2.getRateDownload()));
 			case UploadSpeed:
 				return new Integer(tor1.getRateUpload()).compareTo(new Integer(tor2.getRateUpload()));
 			case Ratio:
@@ -74,9 +80,15 @@ public class TorrentsComparator implements Comparator<Torrent> {
 			case Status:
 				return 0 - tor1.getStatusCode().compareStatusCodeTo(tor2.getStatusCode());
 			case DateAdded:
+				if (tor1.getDateAdded() == null)
+					return 1;
+				if (tor2.getDateAdded() == null)
+					return -1;
 				return 0 - tor1.getDateAdded().compareTo(tor2.getDateAdded());
 			case DateDone:
 				return 0 - tor1.getDateDone().compareTo(tor2.getDateDone());
+			case DownloadSpeed:
+				return 0 - (new Integer(tor1.getRateDownload()).compareTo(new Integer(tor2.getRateDownload())));
 			case UploadSpeed:
 				return 0 - (new Integer(tor1.getRateUpload()).compareTo(new Integer(tor2.getRateUpload())));
 			case Ratio:

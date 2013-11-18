@@ -36,7 +36,6 @@ import org.transdroid.daemon.Torrent;
 import org.transdroid.daemon.task.DaemonTaskResult;
 import org.transdroid.daemon.task.RetrieveTask;
 import org.transdroid.daemon.task.RetrieveTaskSuccessResult;
-import org.transdroid.daemon.util.Collections2;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -69,7 +68,7 @@ public class ServerCheckerService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 
-		if (!connectivityHelper.shouldPerformBackgroundActions() || !notificationSettings.isEnabled()) {
+		if (!connectivityHelper.shouldPerformBackgroundActions() || !notificationSettings.isEnabledForTorrents()) {
 			Log.d(this,
 					"Skip the server checker service, as background data is disabled, the service is disabled or we are not connected.");
 			return;
@@ -88,7 +87,7 @@ public class ServerCheckerService extends IntentService {
 			JSONArray lastStats = applicationSettings.getServerLastStats(server);
 
 			// Synchronously retrieve torrents listing
-			IDaemonAdapter adapter = server.createServerAdapter(connectivityHelper.getConnectedNetworkName());
+			IDaemonAdapter adapter = server.createServerAdapter(connectivityHelper.getConnectedNetworkName(), this);
 			DaemonTaskResult result = RetrieveTask.create(adapter).execute();
 			if (!(result instanceof RetrieveTaskSuccessResult)) {
 				// Cannot retrieve torrents at this time
@@ -140,7 +139,8 @@ public class ServerCheckerService extends IntentService {
 			ArrayList<Torrent> affectedTorrents = new ArrayList<Torrent>(newTorrents.size() + doneTorrents.size());
 			affectedTorrents.addAll(newTorrents);
 			affectedTorrents.addAll(doneTorrents);
-			String title, forString = Collections2.joinString(affectedTorrents, ", ");
+			
+			String title;
 			if (newTorrents.size() > 0 && doneTorrents.size() > 0) {
 				// Note: use the 'one' plural iif 1 new torrent was added and 1 was newly finished
 				title = getResources().getQuantityString(R.plurals.status_service_finished,
@@ -156,7 +156,12 @@ public class ServerCheckerService extends IntentService {
 				// No notification to show
 				continue;
 			}
-
+			String forString = "";
+			for (Torrent affected : affectedTorrents) {
+				forString += affected.getName() + ", ";
+			}
+			forString = forString.substring(0, forString.length() - 2);
+			
 			// Build the basic notification
 			Builder builder = new NotificationCompat.Builder(this).setSmallIcon(R.drawable.ic_stat_notification)
 					.setTicker(title).setContentTitle(title).setContentText(forString)

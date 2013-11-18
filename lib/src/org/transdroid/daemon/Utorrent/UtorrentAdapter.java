@@ -41,12 +41,12 @@ import org.transdroid.daemon.DaemonException;
 import org.transdroid.daemon.DaemonException.ExceptionType;
 import org.transdroid.daemon.DaemonSettings;
 import org.transdroid.daemon.IDaemonAdapter;
+import org.transdroid.daemon.Label;
 import org.transdroid.daemon.Priority;
 import org.transdroid.daemon.Torrent;
 import org.transdroid.daemon.TorrentDetails;
 import org.transdroid.daemon.TorrentFile;
 import org.transdroid.daemon.TorrentStatus;
-import org.transdroid.daemon.Label;
 import org.transdroid.daemon.task.AddByFileTask;
 import org.transdroid.daemon.task.AddByMagnetUrlTask;
 import org.transdroid.daemon.task.AddByUrlTask;
@@ -87,7 +87,7 @@ public class UtorrentAdapter implements IDaemonAdapter {
 	
 	private DaemonSettings settings;
 	private DefaultHttpClient httpclient;
-	private String authtoken;
+	private static String authtoken;
 
 	/**
 	 * Initialises an adapter that provides operations to the uTorrent web daemon
@@ -248,7 +248,13 @@ public class UtorrentAdapter implements IDaemonAdapter {
 				makeUtorrentRequest("&action=setprops" + RPC_URL_HASH + trackersTask.getTargetTorrent().getUniqueID() + 
 						"&s=trackers&v=" + URLEncoder.encode(newTrackersText, "UTF-8"));
 				return new DaemonTaskSuccessResult(task);
-			
+
+			case ForceRecheck:
+
+				// Force re-check of data on a torrent
+				makeUtorrentRequest("&action=recheck" + RPC_URL_HASH + task.getTargetTorrent().getUniqueID());
+				return new DaemonTaskSuccessResult(task);
+
 			default:
 				return new DaemonTaskFailureResult(task, new DaemonException(ExceptionType.MethodUnsupported, task.getMethod() + " is not supported by " + getType()));
 			}
@@ -286,6 +292,10 @@ public class UtorrentAdapter implements IDaemonAdapter {
 	}
 
 	private JSONObject makeUtorrentRequest(String addToUrl) throws DaemonException {
+		return makeUtorrentRequest(addToUrl, 0);
+	}
+	
+	private JSONObject makeUtorrentRequest(String addToUrl, int retried) throws DaemonException {
 
 		try {
 				
@@ -304,7 +314,11 @@ public class UtorrentAdapter implements IDaemonAdapter {
 			InputStream instream = response.getEntity().getContent();
 			String result = HttpHelper.convertStreamToString(instream);
 			if ((result.equals("") || result.trim().equals("invalid request"))) {
-				authtoken = null;
+				// Auth token was invalidated; retry at max 3 times
+				authtoken = null; // So that ensureToken() will request a new token on the next try
+				if (retried < 2) {
+					return makeUtorrentRequest(addToUrl, retried++);
+				}
 				throw new DaemonException(ExceptionType.AuthenticationFailure, "Response was '" + result.replace("\n", "") + "' instead of a proper JSON object (and we used auth token '" + authtoken + "')");
 			}
 			JSONObject json = new JSONObject(result);
@@ -329,7 +343,7 @@ public class UtorrentAdapter implements IDaemonAdapter {
 		if (authtoken == null) {
 			
 			// Make a request to /gui/token.html
-			// See http://trac.utorrent.com/trac/wiki/TokenSystem
+			// See https://github.com/bittorrent/webui/wiki/TokenSystem
 			HttpGet httpget = new HttpGet(buildWebUIUrl() + "token.html");
 			
 			// Parse the response HTML
@@ -489,10 +503,10 @@ public class UtorrentAdapter implements IDaemonAdapter {
 			}
 			// Add the parsed torrent to the list
 			TorrentStatus status = convertUtorrentStatus(tor.getInt(RPC_STATUS_IDX), downloaded);
-			long addedOn = tor.optInt(RPC_ADDEDON_IDX, -1) * 1000L;
-			long completedOn = tor.optInt(RPC_COMPLETEDON_IDX, -1) * 100L;
-			Date addedOnDate = addedOn == -1? null: new Date(addedOn);
-			Date completedOnDate = completedOn == -1? null: new Date(completedOn);
+			long addedOn = tor.optInt(RPC_ADDEDON_IDX, -1);
+			long completedOn = tor.optInt(RPC_COMPLETEDON_IDX, -1);
+			Date addedOnDate = addedOn == -1? null: new Date(addedOn * 1000L);
+			Date completedOnDate = completedOn == -1? null: new Date(completedOn * 1000L);
 			torrents.add(new Torrent(
 					i, // No ID but a hash is used
 					tor.getString(RPC_HASH_IDX),

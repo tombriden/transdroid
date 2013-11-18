@@ -18,6 +18,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 	
 	<CheckBoxPreference
+		android:key="system_dormantasinactive"
+		android:title="@string/pref_dormantasinactive"
+		android:summary="@string/pref_dormantasinactive_info"
+		android:defaultValue="false" />
+	
+	<CheckBoxPreference
 		android:key="system_checkupdates"
 		android:title="@string/pref_checkupdates"
 		android:summary="@string/pref_checkupdates_info"
@@ -38,6 +44,10 @@
 		android:key="system_installhelp"
 		android:title="@string/pref_installhelp"
 		android:summary="@string/pref_installhelp_info" />
+	
+	<Preference
+		android:key="system_clearsearch"
+		android:title="@string/pref_clearsearch" />
 	
 	<Preference
 		android:key="system_importsettings"

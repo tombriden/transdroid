@@ -32,6 +32,7 @@
 	<string name="action_sort_status">Status</string>
 	<string name="action_sort_done">Date done</string>
 	<string name="action_sort_added">Date added</string>
+	<string name="action_sort_downspeed">Download speed</string>
 	<string name="action_sort_upspeed">Upload speed</string>
 	<string name="action_sort_ratio">Ratio</string>
 	<string name="action_filter">Filter list</string>
@@ -40,21 +41,26 @@
 	<string name="action_start">Start</string>
 	<string name="action_start_default">Normal start</string>
 	<string name="action_start_forced">Force start</string>
+	<string name="action_startall">Start all</string>
 	<string name="action_stop">Stop</string>
+	<string name="action_stopall">Stop all</string>
 	<string name="action_resume">Resume</string>
+	<string name="action_resumeall">Resume all</string>
 	<string name="action_pause">Pause</string>
+	<string name="action_pauseall">Pause all</string>
 	<string name="action_remove">Remove</string>
 	<string name="action_remove_default">Remove torrent</string>
 	<string name="action_remove_withdata">Remove and delete data</string>
 	<string name="action_setlabel">Set label</string>
 	<string name="action_updatetrackers">Update trackers</string>
 	<string name="action_changelocation">Change storage location</string>
+	<string name="action_forcerecheck">Force data recheck</string>
 	<string name="action_priority_off">Off</string>
 	<string name="action_priority_low">Low</string>
 	<string name="action_priority_normal">Normal</string>
 	<string name="action_priority_high">High</string>
 	<string name="action_remoteplay">Remote play in VLC</string>
-	<string name="action_download">Download using (S)FTP</string>
+	<string name="action_download">Download using FTP(S)</string>
 	<string name="action_showdetails">Show details</string>
 	<string name="action_removesettings">Remove settings</string>
 	<string name="action_visitwebsite">Visit transdroid.org</string>
@@ -79,6 +85,7 @@
 		<item quantity="other">%1$d files selected</item>
 	</plurals>
 	<string name="navigation_selectall">Select all</string>
+	<string name="navigation_selectfinished">Select finished</string>
 	<string name="navigation_invertselection">Invert selection</string>
 	
 	<string name="status_status">STATUS: %1$s</string>
@@ -154,6 +161,7 @@
 	<string name="result_trackersupdated">Trackers updated</string>
 	<string name="result_labelset">Label set to \'%1$s\'</string>
 	<string name="result_labelremoved">Label removed</string>
+	<string name="result_recheckedstarted">Checking %1$s data</string>
 	<string name="result_locationset">Torrent moved to \'%1$s\'</string>
 	<string name="result_priotitiesset">File priorities updated</string>
 	<string name="result_maxspeedsset">Maximum transfer speeds set</string>
@@ -196,6 +204,7 @@
 	<string name="widget_lookfeel">LOOK &amp; FEEL</string>
 	<string name="widget_sortby">SORT ORDER</string>
 	<string name="widget_reversesortorder">Reversed sort order</string>
+	<string name="widget_showstatusview">Server status instead of title</string>
 	<string name="widget_usedarktheme">Use dark theme (no preview)</string>
 	<string name="widget_done">DONE</string>
 	
@@ -227,6 +236,7 @@
 	<string name="pref_advanced">Advanced settings</string>
 	<string name="pref_localaddress">Local IP or host</string>
 	<string name="pref_localaddress_info">When connected to the specified local network</string>
+	<string name="pref_localport">Local port number</string>
 	<string name="pref_localnetwork">Local network</string>
 	<string name="pref_localnetwork_info">The server\'s local network SSID</string>
 	<string name="pref_folder">Folder</string>
@@ -242,9 +252,11 @@
 	<string name="pref_downdir_info">Manually set absolute path for remote connections</string>
 	<string name="pref_timeout">Connection timeout</string>
 	<string name="pref_timeout_info">Number of seconds before a connection attempt is aborted</string>
-	<string name="pref_ftpurl">Base (S)FTP url</string>
+	<string name="pref_ftpurl">Base FTP(S) url</string>
 	<string name="pref_ftpurl_into">For example ftp://me@server/downloads/</string>
-	<string name="pref_ftppass">(S)FTP password</string>
+	<string name="pref_ftppass">FTP(S) password</string>
+	<string name="pref_disableauth">Disable authentication</string>
+	<string name="pref_disableauth_info">Don\'t send username and password</string>
 	<string name="pref_sslenable">Use SSL</string>
 	<string name="pref_sslenable_info">Connect using https</string>
 	<string name="pref_sslkey">Custom SSL thumbprint (SHA-1)</string>
@@ -253,10 +265,11 @@
 	<string name="pref_sslacceptall_info">Allow all connections from any thumbprint</string>
 	
 	<string name="pref_background">Background notifications</string>
-	<string name="pref_notifications">Enable notifications</string>
+	<string name="pref_notifications_rss">Enable RSS notifications</string>
+	<string name="pref_notifications_torrent">Enable torrent notifications</string>
 	<string name="pref_notifications_info">Enables the background service</string>
 	<string name="pref_notifyinterval">Interval</string>
-	<string name="pref_notifyinterval_info">How often to check the server</string>
+	<string name="pref_notifyinterval_info">How often to check RSS or torrents</string>
 	<string name="pref_notifysound">Sound</string>
 	<string name="pref_notifyvibrate">Vibrate</string>
 	<string name="pref_notifyled">LED colour</string>
@@ -265,10 +278,14 @@
 	<string name="pref_adw_info">Show torrent counter in ADW Launcher</string>
 	
 	<string name="pref_system">System</string>
+	<string name="pref_dormantasinactive">Treat dormant torrents as inactive</string>
+	<string name="pref_dormantasinactive_info">Torrents at 0KB/s (no data transfer) will be filtered as being inactive</string>
 	<string name="pref_checkupdates">Check for updates</string>
 	<string name="pref_checkupdates_info">Check transdroid.org for latest app version</string>
 	<string name="pref_usedarktheme">Use dark UI theme</string>
 	<string name="pref_usedarktheme_info">Requires a restart to take effect</string>
+	<string name="pref_clearsearch">Clear search history</string>
+	<string name="pref_clearsearch_success">Search history is cleared</string>
 	<string name="pref_import">Import settings</string>
 	<string name="pref_import_dialog">%1$s will try to import server, web search, RSS and system settings from: %2$s</string>
 	<string name="pref_import_success">Settings successfully imported</string>
@@ -355,6 +372,7 @@
 	<string name="error_invalid_port_number">Port number is always numeric</string>
 	<string name="error_invalid_directory">Directory paths end with a / or \</string>
 	<string name="error_invalid_timeout">Timeout can not be empty and is a positive number</string>
+	<string name="error_notorrentfile">The search result does not link to a .torrent file</string>
 	<string name="error_no_url_enclosure">The RSS feed item didn\'t provide an URL enclosure or link tag pointing to the .torrent file</string>
 	<string name="error_no_link">The RSS feed item does not provide a link to browse to</string>
 	<string name="error_norssfeed">URL is not a (valid) RSS feed</string>
@@ -374,7 +392,7 @@
 	<string name="system_developer" translatable="false">\u00A9 Eric Kok, 2312 development</string>
 	<string name="system_license" translatable="false">Published under GNU General Public License v3</string>
 	<string name="system_librarieslabel">Some code/libraries are used in the project:</string>
-	<string name="system_libraries" translatable="false">ActionBarSherlock\n \u00A0 http://actionbarsherlock.com/\n \u00A0 Jake Wharton  \n \u00A0 Apache License, Version 2.0\nAndroidAnnotations\n \u00A0 http://androidannotations.org/\n \u00A0 Pierre-Yves Ricau (eBusinessInformations) et al.  \n \u00A0 Apache License, Version 2.0\nActionBar-PullToRefresh\n \u00A0 https://github.com/chrisbanes/ActionBar-PullToRefresh\n \u00A0 Chris Banes  \n \u00A0 Apache License, Version 2.0\nCrouton\n \u00A0 https://github.com/keyboardsurfer/Crouton\n \u00A0 Code: Benjamin Weiss (Neofonie Mobile Gmbh) et al.  \n \u00A0 Idea: Cyril Mottier  \n \u00A0 Apache License, Version 2.0\nBase16Encoder\n \u00A0 http://openjpa.apache.org/\n \u00A0 Marc Prud\'hommeaux  \n \u00A0 Apache OpenJPA\n MultipartEntity  \n \u00A0 Apache Software Foundation  \n \u00A0 Apache License, Version 2.0\nRssParser (learning-android)\n \u00A0 http://github.com/digitalspaghetti/learning-android\n \u00A0 Tane Piper  \n \u00A0 Public Domain\nBase64\n \u00A0 http://iharder.net/base64\n \u00A0 Robert Harder  \n \u00A0 Public Domain\nandroid-xmlrpc\n \u00A0 http://code.google.com/p/android-xmlrpc/\n \u00A0 pskink et al.  \n \u00A0 Apache License, Version 2.0\nandroid-ColorPickerPreference\n \u00A0 https://github.com/attenzione/android-ColorPickerPreference\n \u00A0 Daniel Nilsson and Sergey Margaritov  \n \u00A0 Apache License, Version 2.0\nCheckableRelativeLayout\n \u00A0 http://www.marvinlabs.com/2010/10/custom-listview-ability-check-items/\n \u00A0 Cédric Caron (MarvinLabs)\n \u00A0 Public Domain\nFunnel icon\n \u00A0 http://thenounproject.com/noun/funnel/#icon-No5608\n \u00A0 Naomi Atkinson from The Noun Project\n \u00A0 Creative Commons Attribution 3.0</string>
+	<string name="system_libraries" translatable="false">ActionBarSherlock\n \u00A0 http://actionbarsherlock.com/\n \u00A0 Jake Wharton  \n \u00A0 Apache License, Version 2.0\nAndroidAnnotations\n \u00A0 http://androidannotations.org/\n \u00A0 Pierre-Yves Ricau (eBusinessInformations) et al.  \n \u00A0 Apache License, Version 2.0\nActionBar-PullToRefresh\n \u00A0 https://github.com/chrisbanes/ActionBar-PullToRefresh\n \u00A0 Chris Banes  \n \u00A0 Apache License, Version 2.0\nCrouton\n \u00A0 https://github.com/keyboardsurfer/Crouton\n \u00A0 Code: Benjamin Weiss (Neofonie Mobile Gmbh) et al.  \n \u00A0 Idea: Cyril Mottier  \n \u00A0 Apache License, Version 2.0\nBase16Encoder\n \u00A0 http://openjpa.apache.org/\n \u00A0 Marc Prud\'hommeaux  \n \u00A0 Apache OpenJPA\n MultipartEntity  \n \u00A0 Apache Software Foundation  \n \u00A0 Apache License, Version 2.0\nRssParser (learning-android)\n \u00A0 http://github.com/digitalspaghetti/learning-android\n \u00A0 Tane Piper  \n \u00A0 Public Domain\nBase64\n \u00A0 http://iharder.net/base64\n \u00A0 Robert Harder  \n \u00A0 Public Domain\naXMLRPC\n \u00A0 https://github.com/timroes/aXMLRPC\n \u00A0 Tim Roes  \n \u00A0 MIT License\nandroid-ColorPickerPreference\n \u00A0 https://github.com/attenzione/android-ColorPickerPreference\n \u00A0 Daniel Nilsson and Sergey Margaritov  \n \u00A0 Apache License, Version 2.0\nCheckableRelativeLayout\n \u00A0 http://www.marvinlabs.com/2010/10/custom-listview-ability-check-items/\n \u00A0 Cédric Caron (MarvinLabs)\n \u00A0 Public Domain\nFunnel icon\n \u00A0 http://thenounproject.com/noun/funnel/#icon-No5608\n \u00A0 Naomi Atkinson from The Noun Project\n \u00A0 Creative Commons Attribution 3.0</string>
 	<string name="system_description">Manage your torrents from your Android device</string>
 
 </resources>

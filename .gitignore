@@ -20,3 +20,5 @@ ant.properties
 # Eclipse project files
 .classpath
 .project
+.settings/
+.local.properties

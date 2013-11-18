@@ -35,12 +35,18 @@ public class Label implements SimpleListItem, NavigationFilter, Comparable<Label
 
 	private static String unnamedLabelText = null;
 
+	private final boolean isEmptyLabel;
 	private final String name;
 	private final int count;
 
+	private Label(String name, int count, boolean isEmptyLabel) {
+		this.name = name;
+		this.count = count;
+		this.isEmptyLabel = isEmptyLabel;
+	}
+	
 	public Label(org.transdroid.daemon.Label daemonLabel) {
-		this.name = daemonLabel.getName();
-		this.count = daemonLabel.getCount();
+		this(daemonLabel.getName(), daemonLabel.getCount(), false);
 	}
 
 	@Override
@@ -54,11 +60,19 @@ public class Label implements SimpleListItem, NavigationFilter, Comparable<Label
 		return count;
 	}
 
+	public boolean isEmptyLabel() {
+		return isEmptyLabel;
+	}
+
 	/**
 	 * Returns true if the torrent label's name matches this (selected) label's name, false otherwise
+	 * @param torrent The torrent to match against this label
+	 * @param dormantAsInactive This property is ignored for label comparisons
 	 */
 	@Override
-	public boolean matches(Torrent torrent) {
+	public boolean matches(Torrent torrent, boolean dormantAsInactive) {
+		if (isEmptyLabel)
+			return TextUtils.isEmpty(torrent.getLabelName());
 		return torrent.getLabelName() != null && torrent.getLabelName().equals(name);
 	}
 
@@ -78,8 +92,9 @@ public class Label implements SimpleListItem, NavigationFilter, Comparable<Label
 			String unnamedLabel) {
 		if (daemonLabels == null)
 			return null;
-		unnamedLabelText = unnamedLabel;
 		ArrayList<Label> localLabels = new ArrayList<Label>();
+		unnamedLabelText = unnamedLabel;
+		localLabels.add(new Label(unnamedLabel, -1, true));
 		for (org.transdroid.daemon.Label label : daemonLabels) {
 			localLabels.add(new Label(label));
 		}
@@ -90,6 +105,7 @@ public class Label implements SimpleListItem, NavigationFilter, Comparable<Label
 	private Label(Parcel in) {
 		this.name = in.readString();
 		this.count = in.readInt();
+		this.isEmptyLabel = in.readInt() == 1;
 	}
 
 	public static final Parcelable.Creator<Label> CREATOR = new Parcelable.Creator<Label>() {
@@ -111,6 +127,7 @@ public class Label implements SimpleListItem, NavigationFilter, Comparable<Label
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(name);
 		dest.writeInt(count);
+		dest.writeInt(isEmptyLabel? 1: 0);
 	}
 
 }
