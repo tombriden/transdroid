@@ -401,7 +401,7 @@ public class UtorrentAdapter implements IDaemonAdapter {
 	 * @return The URL of the RPC API
 	 */
 	private String buildWebUIUrl() {
-		return (settings.getSsl() ? "https://" : "http://") + settings.getAddress() + ":" + settings.getPort() + "/gui/";
+		return (settings.getSsl() ? "https://" : "http://") + settings.getAddress() + ":" + settings.getPort() + "/";
 	}
 
 	private TorrentStatus convertUtorrentStatus(int uStatus, boolean finished) {
